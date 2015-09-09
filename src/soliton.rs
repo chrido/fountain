@@ -1,25 +1,25 @@
 extern crate rand;
 use rand::*;
 
-pub struct Soliton {
-    n: u32,
+pub struct RobustSoliton {
+    n: usize,
     rng: StdRng
 }
 
-impl Soliton {
-    pub fn new(n: u32, seed: usize) -> Soliton {
+impl RobustSoliton {
+    pub fn new(n: usize, seed: usize) -> RobustSoliton {
         let seedarr: &[_] = &[seed];
         let rng: StdRng = SeedableRng::from_seed(seedarr);
-        Soliton {n: n, rng: rng}
+        RobustSoliton {n: n, rng: rng}
     }
 }
 
-impl Iterator for Soliton {
-    type Item = u32;
+impl Iterator for RobustSoliton {
+    type Item = usize;
 
-    fn next(&mut self) -> Option<u32> {
+    fn next(&mut self) -> Option<usize> {
         let x = self.rng.gen::<f32>();
-        let i = (1.0/x).ceil() as u32;
+        let i = (1.0/x).ceil() as usize;
         if i <= self.n {
             Some(i)
         }
