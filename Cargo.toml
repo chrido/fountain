@@ -3,5 +3,12 @@ name = "fountaincode"
 version = "0.0.1"
 authors = ["Christoph Doblander <chris@degree.at>"]
 
+description = "Implementation of the Luby Transform Code in Rust"
+homepage = "https://github.com/chrido/fountain"
+repository = "https://github.com/chrido/fountain"
+readme = "https://github.com/chrido/fountain/blob/master/README.md"
+license = "MIT"
+
+
 [dependencies]
 rand = "0.3.11"
