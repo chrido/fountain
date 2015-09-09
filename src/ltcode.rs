@@ -191,23 +191,20 @@ impl Decoder {
 
                             while block.edges.len() > 0 {
                                 let edge = block.edges.pop().unwrap();
-                                {
-                                    let mut m_edge = edge.borrow_mut();
+                                let mut m_edge = edge.borrow_mut();
 
+                                if m_edge.edges_idx.len() == 1 {
+                                    drops.push(edge.clone());
+                                }
+                                else {
+                                    for i in 0..self.blocksize {
+                                        m_edge.data[i] ^= self.data[block.begin_at+i]
+                                    }
+
+                                    let pos = m_edge.edges_idx.iter().position(|x| x == &block.idx).unwrap();
+                                    m_edge.edges_idx.remove(pos);
                                     if m_edge.edges_idx.len() == 1 {
                                         drops.push(edge.clone());
-                                    }
-                                    else {
-                                        for i in 0..self.blocksize {
-                                            m_edge.data[i] ^= self.data[block.begin_at+i]
-                                        }
-
-                                        let pos = m_edge.edges_idx.iter().position(|x| x == &block.idx).unwrap();
-                                        m_edge.edges_idx.remove(pos);
-
-                                        if m_edge.edges_idx.len() == 1 {
-                                            drops.push(edge.clone());
-                                        }
                                     }
                                 }
                             }
