@@ -1,11 +1,11 @@
 [package]
 name = "fountaincode"
-version = "0.0.1"
+version = "0.0.2"
 authors = ["Christoph Doblander <chris@degree.at>"]
 
 description = "Implementation of the Luby Transform Code in Rust"
 homepage = "https://github.com/chrido/fountain"
-repository = "https://github.com/chrido/fountain"
+repository = "https://github.com/chrido/fountain.git"
 license = "MIT"
 
 

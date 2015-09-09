@@ -13,7 +13,7 @@ Add `fountaincode` as a dependency in `Cargo.toml`
 
 ```toml
 [dependencies]
-fountaincode = "0.0.1"
+fountaincode = "0.0.2"
 ```
 
 ## Example
