@@ -155,7 +155,7 @@ impl Decoder {
     fn process_droplet(&mut self, droplet: RxDroplet) {
         let mut drops:Vec<Rc<RefCell<RxDroplet>>> = Vec::new();
         drops.push(Rc::new(RefCell::new(droplet)));
-        loop {
+        loop { //a loop is used instead of recursion
             match drops.pop() {
                 None => return,
                 Some(drop) => {
@@ -165,7 +165,7 @@ impl Decoder {
                         if block.is_known {
                             let mut b_drop = drop.borrow_mut();
                             for i in 0..self.blocksize {
-                                self.data[block.begin_at+i] ^= b_drop.data[i];
+                                b_drop.data[i] ^= self.data[block.begin_at+i];
                             }
                             let pos = b_drop.edges_idx.iter().position(|x| x == &ed).unwrap();
                             b_drop.edges_idx.remove(pos);
@@ -180,20 +180,21 @@ impl Decoder {
                         let block = self.blocks.get_mut(first_idx).unwrap();
 
                         if block.is_known == false {
-                            for i in 0..self.blocksize {
-                                self.data[block.begin_at+i] = drop.borrow().data[i];
+                            {
+                                let b_drop = drop.borrow();
+                                for i in 0..self.blocksize {
+                                    self.data[block.begin_at+i] = b_drop.data[i];
+                                }
                             }
                             block.is_known = true;
                             self.unknown_chunks -= 1;
 
                             while block.edges.len() > 0 {
-                                let mut to_push = false;
                                 let edge = block.edges.pop().unwrap();
                                 {
                                     let mut m_edge = edge.borrow_mut();
 
                                     if m_edge.edges_idx.len() == 1 {
-                                        to_push = true;
                                         drops.push(edge.clone());
                                     }
                                     else {
@@ -231,7 +232,13 @@ impl Decoder {
         };
 
         if self.unknown_chunks == 0 {
-            CatchResult::Finished(self.data.clone(), stats) //TODO: there shouldn't be a copy
+            let mut result = Vec::with_capacity(self.total_length);
+            debug!("element: {:?}", self.data[0]);
+            debug!("total_length: {:?}, result: {:?}", self.total_length, self.data.len());
+            for i in 0..self.total_length {
+                result.push(self.data[i]);
+            }
+            CatchResult::Finished(result, stats) //TODO: there shouldn't be a copy
         }
         else {
             CatchResult::Missing(stats)
