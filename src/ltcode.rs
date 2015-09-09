@@ -108,10 +108,10 @@ pub struct Decoder {
 
 #[derive(Debug)]
 pub struct Statistics {
-    cnt_droplets: usize,
-    cnt_chunks: usize,
-    overhead: f32,
-    unknown_chunks: usize
+    pub cnt_droplets: usize,
+    pub cnt_chunks: usize,
+    pub overhead: f32,
+    pub unknown_chunks: usize
 }
 
 #[derive(Debug)]
