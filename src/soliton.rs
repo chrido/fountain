@@ -1,20 +1,20 @@
 extern crate rand;
 use rand::*;
 
-pub struct RobustSoliton {
+pub struct IdealSoliton {
     n: usize,
     rng: StdRng
 }
 
-impl RobustSoliton {
-    pub fn new(n: usize, seed: usize) -> RobustSoliton {
+impl IdealSoliton {
+    pub fn new(n: usize, seed: usize) -> IdealSoliton {
         let seedarr: &[_] = &[seed];
         let rng: StdRng = SeedableRng::from_seed(seedarr);
-        RobustSoliton {n: n, rng: rng}
+        IdealSoliton {n: n, rng: rng}
     }
 }
 
-impl Iterator for RobustSoliton {
+impl Iterator for IdealSoliton {
     type Item = usize;
 
     fn next(&mut self) -> Option<usize> {

@@ -4,7 +4,7 @@ use std::rc::Rc;
 use std::cmp;
 use rand::{Rng, sample, StdRng, SeedableRng};
 
-use soliton::RobustSoliton;
+use soliton::IdealSoliton;
 
 /// Encoder for Luby transform codes
 pub struct Encoder {
@@ -13,7 +13,7 @@ pub struct Encoder {
     blocksize: usize,
     rng: StdRng,
     cnt_blocks: usize,
-    sol: RobustSoliton
+    sol: IdealSoliton
 }
 
 
@@ -58,7 +58,7 @@ impl Encoder {
 
         let len = data.len();
         let cnt_blocks = ((len as f32)/blocksize as f32).ceil() as usize;
-        let sol = RobustSoliton::new(cnt_blocks, rng.gen::<usize>());
+        let sol = IdealSoliton::new(cnt_blocks, rng.gen::<usize>());
         Encoder{data: data, len: len, blocksize: blocksize, rng: rng, cnt_blocks: cnt_blocks, sol: sol}
     }
 }
