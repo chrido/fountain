@@ -230,12 +230,10 @@ impl Decoder {
 
         if self.unknown_chunks == 0 {
             let mut result = Vec::with_capacity(self.total_length);
-            debug!("element: {:?}", self.data[0]);
-            debug!("total_length: {:?}, result: {:?}", self.total_length, self.data.len());
-            for i in 0..self.total_length {
+            for i in 0..self.total_length { //TODO: we should be able to do that without copying
                 result.push(self.data[i]);
             }
-            CatchResult::Finished(result, stats) //TODO: there shouldn't be a copy
+            CatchResult::Finished(result, stats)
         }
         else {
             CatchResult::Missing(stats)
