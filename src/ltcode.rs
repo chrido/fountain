@@ -6,6 +6,7 @@ use rand::{Rng, sample, StdRng, SeedableRng};
 
 use soliton::RobustSoliton;
 
+/// Encoder for Luby transform codes
 pub struct Encoder {
     data: Vec<u8>,
     len: usize,
@@ -15,10 +16,15 @@ pub struct Encoder {
     sol: RobustSoliton
 }
 
+
+/// A Droplet is created by the Encoder.
 #[derive(Debug)]
 pub struct Droplet {
+    /// How many chunks are used
     degree: usize,
+    /// The seed of the Random number generator to create the indexes of the corresponding chunks
     seed: usize,
+    /// The payload of the Droplet
     data: Vec<u8>
 }
 
@@ -29,8 +35,26 @@ impl Droplet {
 }
 
 impl Encoder {
+    ///
+    /// Constructs a new encoder for Luby transform codes.
+    /// In case you send the packages over UDP, the blocksize
+    /// should be the MTU size.
+    ///
+    /// The Encoder implements the iterator. You can use the iterator
+    /// to produce an infinte stream of Droplets
+    ///
+    /// # Examples
+    /// ```
+    /// use ltcode::Encoder;
+    ///
+    /// let mut buf = Vec::new();
+    /// let mut f = File::open("testfile.bin").unwrap();
+    /// try!(f.read_to_end(&mut buf));
+    ///
+    /// let mut enc = Encoder::new(buf, 1300);
+    ///
     pub fn new(data: Vec<u8>, blocksize: usize) -> Encoder {
-        let mut rng = StdRng::new().unwrap(); //TODO: there should not be any work in the constructor
+        let mut rng = StdRng::new().unwrap();
 
         let len = data.len();
         let cnt_blocks = ((len as f32)/blocksize as f32).ceil() as usize;
@@ -76,14 +100,23 @@ pub struct Decoder {
     blocksize: usize,
     unknown_chunks: usize,
     number_of_chunks: usize,
+    cnt_received_drops: usize,
     blocks: Vec<Block>,
     data: Vec<u8>
 }
 
 #[derive(Debug)]
+pub struct Statistics {
+    cnt_droplets: usize,
+    cnt_chunks: usize,
+    overhead: f32,
+    unknown_chunks: usize
+}
+
+#[derive(Debug)]
 pub enum CatchResult {
-    Finished(Vec<u8>),
-    Missing(usize)
+    Finished(Vec<u8>, Statistics),
+    Missing(Statistics)
 }
 
 #[derive(Debug)]
@@ -106,12 +139,17 @@ impl Decoder {
         let number_of_chunks = ((len as f32)/blocksize as f32).ceil() as usize;
         let mut edges:Vec<Block> = Vec::with_capacity(number_of_chunks);
         for i in 0..number_of_chunks {
-            trace!("d_begin_at: {:?}", i*blocksize);
             let blk = Block{idx: i, edges: Vec::new(), begin_at: blocksize * i, is_known: false};
             edges.push(blk);
         }
 
-        Decoder{ total_length: len, number_of_chunks: number_of_chunks, unknown_chunks: number_of_chunks, blocks: edges, data: data, blocksize: blocksize}
+        Decoder{ total_length: len,
+                 number_of_chunks: number_of_chunks,
+                 unknown_chunks: number_of_chunks,
+                 cnt_received_drops: 0,
+                 blocks: edges,
+                 data: data,
+                 blocksize: blocksize }
     }
 
     fn process_droplet(&mut self, droplet: RxDroplet) {
@@ -168,12 +206,11 @@ impl Decoder {
 
                                         if m_edge.edges_idx.len() == 1 {
                                             drops.push(edge.clone());
-                                       }
+                                        }
                                     }
                                 }
                             }
                         }
-
                     }
                 }
             }
@@ -181,14 +218,23 @@ impl Decoder {
     }
 
     pub fn catch(&mut self, drop: Droplet) -> CatchResult {
+        self.cnt_received_drops +=1;
+
         let sample = get_sample_from_rng_by_seed(drop.seed, self.number_of_chunks, drop.degree);
         let rxdrop = RxDroplet {edges_idx: sample, data: drop.data};
         self.process_droplet(rxdrop);
+        let stats = Statistics {
+            cnt_droplets: self.cnt_received_drops,
+            cnt_chunks: self.number_of_chunks,
+            overhead: self.cnt_received_drops as f32 * 100.0 / self.number_of_chunks as f32,
+            unknown_chunks: self.unknown_chunks
+        };
+
         if self.unknown_chunks == 0 {
-            CatchResult::Finished(self.data.clone()) //TODO: there shouldn't be a copy
+            CatchResult::Finished(self.data.clone(), stats) //TODO: there shouldn't be a copy
         }
         else {
-            CatchResult::Missing(self.unknown_chunks)
+            CatchResult::Missing(stats)
         }
     }
 }

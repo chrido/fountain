@@ -16,7 +16,9 @@ use std::io::prelude::*;
 
 fn main() {
     env_logger::init().unwrap();
-    test_fountain().unwrap()
+    for _ in 0..1000 {
+        test_fountain().unwrap();
+    }
 }
 
 fn test_fountain() -> Result<(), Error> {
@@ -36,9 +38,9 @@ fn test_fountain() -> Result<(), Error> {
             Missing(cnt) => {
                 trace!("missing: {:?}", cnt);
             }
-            Finished(data) => {
+            Finished(data, stats) => {
                 done = true;
-                debug!("finished!");
+                debug!("finished! {:?}", stats);
             }
         }
     }
