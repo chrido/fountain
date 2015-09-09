@@ -95,6 +95,7 @@ impl Iterator for Encoder {
 }
 
 
+/// Decoder for the Luby transform
 pub struct Decoder {
     total_length: usize,
     blocksize: usize,
@@ -215,6 +216,8 @@ impl Decoder {
         }
     }
 
+    /// Catches a Droplet
+    /// When it is possible to reconstruct a set, the bytes are returned
     pub fn catch(&mut self, drop: Droplet) -> CatchResult {
         self.cnt_received_drops +=1;
 
