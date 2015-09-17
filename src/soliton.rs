@@ -2,15 +2,15 @@ extern crate rand;
 use rand::*;
 
 pub struct IdealSoliton {
-    n: usize,
+    limit: f32,
     rng: StdRng
 }
 
 impl IdealSoliton {
-    pub fn new(n: usize, seed: usize) -> IdealSoliton {
+    pub fn new(k: usize, seed: usize) -> IdealSoliton {
         let seedarr: &[_] = &[seed];
         let rng: StdRng = SeedableRng::from_seed(seedarr);
-        IdealSoliton {n: n, rng: rng}
+        IdealSoliton {limit: 1.0/(k as f32), rng: rng}
     }
 }
 
@@ -18,10 +18,10 @@ impl Iterator for IdealSoliton {
     type Item = usize;
 
     fn next(&mut self) -> Option<usize> {
-        let x = self.rng.gen::<f32>();
-        let i = (1.0/x).ceil() as usize;
-        if i <= self.n {
-            Some(i)
+        let y = self.rng.gen::<f32>();
+        if y >= self.limit {
+            let res = (1.0/y).ceil() as usize;
+            Some(res)
         }
         else {
             Some(1)

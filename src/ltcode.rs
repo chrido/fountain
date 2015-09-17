@@ -35,7 +35,6 @@ impl Droplet {
 }
 
 impl Encoder {
-    ///
     /// Constructs a new encoder for Luby transform codes.
     /// In case you send the packages over UDP, the blocksize
     /// should be the MTU size.
@@ -44,15 +43,25 @@ impl Encoder {
     /// to produce an infinte stream of Droplets
     ///
     /// # Examples
+    ///
     /// ```
-    /// use ltcode::Encoder;
+    /// extern crate rand;
+    /// extern crate fountaincode;
     ///
-    /// let mut buf = Vec::new();
-    /// let mut f = File::open("testfile.bin").unwrap();
-    /// try!(f.read_to_end(&mut buf));
+    /// fn main() {
+    ///     use fountaincode::ltcode::Encoder;
+    ///     use self::rand::{thread_rng, Rng};
     ///
-    /// let mut enc = Encoder::new(buf, 1300);
+    ///     let s:String = thread_rng().gen_ascii_chars().take(1_024).collect();
+    ///     let buf = s.into_bytes();
     ///
+    ///     let mut enc = Encoder::new(buf, 64);
+    ///
+    ///     for i in 1..10 {
+    ///         println!("droplet {:?}: {:?}", i, enc.next());
+    ///     }
+    /// }
+    /// ```
     pub fn new(data: Vec<u8>, blocksize: usize) -> Encoder {
         let mut rng = StdRng::new().unwrap();
 
@@ -93,6 +102,14 @@ impl Iterator for Encoder {
         Some(Droplet::new(degree, seed, r))
     }
 }
+
+//impl Iterator for SystematicEncoder {
+//    type Item = Droplet;
+//
+//    fn next(&mut self) -> Option<Droplet> {
+//
+//    }
+//}
 
 
 /// Decoder for the Luby transform
