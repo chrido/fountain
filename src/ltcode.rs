@@ -152,6 +152,44 @@ struct Block {
 
 
 impl Decoder {
+    /// Creates a new Decoder for LT codes
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// extern crate rand;
+    /// extern crate fountaincode;
+    ///
+    /// fn main() {
+    ///     use fountaincode::ltcode::{Encoder, Decoder};
+    ///     use fountaincode::ltcode::CatchResult::*;
+    ///     use self::rand::{thread_rng, Rng};
+    ///
+    ///     let s:String = thread_rng().gen_ascii_chars().take(1_024).collect();
+    ///     let buf = s.into_bytes();
+    ///     let to_compare = buf.clone();
+    ///     let length = buf.len();
+    ///
+    ///     let mut enc = Encoder::new(buf, 64);
+    ///     let mut dec = Decoder::new(length, 64);
+    ///
+    ///     for drop in enc {
+    ///         match dec.catch(drop) {
+    ///             Missing(stats) => {
+    ///                 println!("Missing blocks {:?}", stats);
+    ///             }
+    ///             Finished(data, stats) => {
+    ///                 for i in 0..length {
+    ///                     assert_eq!(to_compare[i], data[i]);
+    ///                 }
+    ///                 println!("Finished, stas: {:?}", stats);
+    ///                 //write data to disk??
+    ///                 return
+    ///             }
+    ///         }
+    ///     }
+    /// }
+    /// ```
     pub fn new(len: usize, blocksize: usize) -> Decoder {
         let data:Vec<u8> = vec![0; len];
         let number_of_chunks = ((len as f32)/blocksize as f32).ceil() as usize;
