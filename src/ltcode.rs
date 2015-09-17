@@ -191,8 +191,8 @@ impl Decoder {
     /// }
     /// ```
     pub fn new(len: usize, blocksize: usize) -> Decoder {
-        let data:Vec<u8> = vec![0; len];
         let number_of_chunks = ((len as f32)/blocksize as f32).ceil() as usize;
+        let data:Vec<u8> = vec![0; number_of_chunks * blocksize];
         let mut edges:Vec<Block> = Vec::with_capacity(number_of_chunks);
         for i in 0..number_of_chunks {
             let blk = Block{idx: i, edges: Vec::new(), begin_at: blocksize * i, is_known: false};
