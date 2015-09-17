@@ -1,19 +1,19 @@
 extern crate rand;
 extern crate fountaincode;
 
-use self::fountaincode::ltcode::{Encoder, Decoder};
+use self::fountaincode::ltcode::{Encoder, EncoderType, Decoder};
 use self::fountaincode::ltcode::CatchResult::*;
 
 use rand::{thread_rng, Rng};
 
 
-fn encode_decode(total_len: usize, chunk_len: usize) {
+fn encode_decode_random(total_len: usize, chunk_len: usize) {
     let s:String = thread_rng().gen_ascii_chars().take(total_len).collect();
     let buf = s.into_bytes();
     let len = buf.len();
     let to_compare = buf.clone();
 
-    let enc = Encoder::new(buf, chunk_len);
+    let enc = Encoder::new(buf, chunk_len, EncoderType::Random);
     let mut dec = Decoder::new(len, chunk_len);
 
     for drop in enc {
@@ -34,17 +34,61 @@ fn encode_decode(total_len: usize, chunk_len: usize) {
     }
 }
 
+fn encode_decode_systematic(total_len: usize, chunk_len: usize) {
+    let s:String = thread_rng().gen_ascii_chars().take(total_len).collect();
+    let buf = s.into_bytes();
+    let len = buf.len();
+    let to_compare = buf.clone();
+
+    let enc = Encoder::new(buf, chunk_len, EncoderType::Systematic);
+    let mut dec = Decoder::new(len, chunk_len);
+
+    let mut cnt_drops = 0;
+
+    for drop in enc {
+        cnt_drops += 1;
+        match dec.catch(drop) {
+            Missing(stats) => {
+                //a systematic encoder and no loss on channel should only need k symbols
+                assert_eq!(stats.cnt_chunks-stats.unknown_chunks, cnt_drops)
+            }
+            Finished(data, stats) => {
+                assert_eq!(to_compare.len(), data.len());
+                assert_eq!(stats.cnt_chunks, cnt_drops);
+                for i in 0..len {
+                    assert_eq!(to_compare[i], data[i]);
+                }
+                return
+            }
+        }
+    }
+}
+
 
 #[test]
-fn test_decode() {
-    encode_decode(1_024, 512);
+fn test_encode_decode_simple() {
+    encode_decode_random(1_024, 512);
 }
 
 #[test]
-fn test_with_different_sizes() {
+fn encode_decode_with_uneven_sizes_random() {
     for size in 1000..1100 {
         for chunk in 100..130 {
-            encode_decode(size, chunk);
+            encode_decode_random(size, chunk);
+        }
+    }
+}
+
+#[test]
+fn test_systematic_encoder() {
+    encode_decode_systematic(1300, 128);
+}
+
+#[test]
+fn encode_decode_with_uneven_sizes_systematic() {
+    for size in 1000..1100 {
+        for chunk in 100..130 {
+            encode_decode_systematic(size, chunk);
         }
     }
 }
