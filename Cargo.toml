@@ -1,6 +1,6 @@
 [package]
 name = "fountaincode"
-version = "0.0.4"
+version = "0.0.5"
 authors = ["Christoph Doblander <chris@degree.at>"]
 
 description = "Implementation of the Luby Transform Code in Rust"
