@@ -1,5 +1,8 @@
 # Fountain codes
 
+[![Build status](https://travis-ci.org/chrido/fountain.svg?branch=master)](https://travis-ci.org/chrido/fountain)
+[![Crates](http://meritbadge.herokuapp.com/fountaincode)](https://crates.io/crates/fountaincode)
+
 The library implements the Luby Transform Code in [Rust](https://www.rust-lang.org/).
 For more information have a look at [Wikipedia](https://en.wikipedia.org/wiki/Luby_transform_code) or the paper [LT codes](http://dx.doi.org/10.1109/SFCS.2002.1181950) on IEEE Xplore.
 
@@ -13,7 +16,7 @@ Add `fountaincode` as a dependency in `Cargo.toml`
 
 ```toml
 [dependencies]
-fountaincode = "0.0.3"
+fountaincode = "*"
 ```
 
 ## Example

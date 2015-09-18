@@ -73,18 +73,16 @@ fn encode_decode_systematic_with_loss(total_len: usize, chunk_len: usize, loss: 
     let enc = Encoder::new(buf, chunk_len, EncoderType::Systematic);
     let mut dec = Decoder::new(len, chunk_len);
 
-    let mut cnt_drops = 0;
     let mut loss_rng = thread_rng();
 
     for drop in enc {
-        cnt_drops += 1;
         if loss_rng.next_f32() > loss {
             match dec.catch(drop) {
-                Missing(stats) => {
+                Missing(_) => {
                     //a systematic encoder and no loss on channel should only need k symbols
                     //assert_eq!(stats.cnt_chunks-stats.unknown_chunks, cnt_drops)
                 }
-                Finished(data, stats) => {
+                Finished(data, _) => {
                     assert_eq!(to_compare.len(), data.len());
                     for i in 0..len {
                         assert_eq!(to_compare[i], data[i]);
