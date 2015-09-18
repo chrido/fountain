@@ -1,0 +1,17 @@
+language: rust
+
+rust:
+    - nightly
+    - stable
+
+os:
+    - linux
+
+before_script:
+    - rustc --version
+    - cargo --version
+
+script:
+    - cargo build --verbose
+    - cargo test --verbose
+    - cargo doc --verbose
