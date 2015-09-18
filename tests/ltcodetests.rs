@@ -64,6 +64,39 @@ fn encode_decode_systematic(total_len: usize, chunk_len: usize) {
     }
 }
 
+fn encode_decode_systematic_with_loss(total_len: usize, chunk_len: usize, loss: f32) {
+    let s:String = thread_rng().gen_ascii_chars().take(total_len).collect();
+    let buf = s.into_bytes();
+    let len = buf.len();
+    let to_compare = buf.clone();
+
+    let enc = Encoder::new(buf, chunk_len, EncoderType::Systematic);
+    let mut dec = Decoder::new(len, chunk_len);
+
+    let mut cnt_drops = 0;
+    let mut loss_rng = thread_rng();
+
+    for drop in enc {
+        cnt_drops += 1;
+        if loss_rng.next_f32() > loss {
+            match dec.catch(drop) {
+                Missing(stats) => {
+                    //a systematic encoder and no loss on channel should only need k symbols
+                    //assert_eq!(stats.cnt_chunks-stats.unknown_chunks, cnt_drops)
+                }
+                Finished(data, stats) => {
+                    assert_eq!(to_compare.len(), data.len());
+                    for i in 0..len {
+                        assert_eq!(to_compare[i], data[i]);
+                    }
+                    return
+                }
+            }
+        }
+    }
+}
+
+
 
 #[test]
 fn test_encode_decode_simple() {
@@ -80,15 +113,31 @@ fn encode_decode_with_uneven_sizes_random() {
 }
 
 #[test]
-fn test_systematic_encoder() {
+fn small_test_systematic_encoder() {
     encode_decode_systematic(1300, 128);
 }
 
 #[test]
-fn encode_decode_with_uneven_sizes_systematic() {
+fn combinations_encode_decode_with_uneven_sizes_systematic() {
     for size in 1000..1100 {
         for chunk in 100..130 {
             encode_decode_systematic(size, chunk);
+        }
+    }
+}
+
+#[test]
+fn small_encode_decode_with_loss_begin_with_systematic() {
+    encode_decode_systematic_with_loss(8, 2, 0.1);
+}
+
+#[test]
+fn combinations_encode_decode_with_loss_begin_with_systematic() {
+    for size in 1000..1100 {
+        for chunk in 100..130 {
+            for loss in vec![0.1, 0.3, 0.5, 0.9] {
+                 encode_decode_systematic_with_loss(size, chunk, loss);
+            }
         }
     }
 }

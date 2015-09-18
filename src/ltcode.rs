@@ -6,6 +6,7 @@ use rand::{Rng, sample, StdRng, SeedableRng};
 
 use soliton::IdealSoliton;
 
+#[derive(Clone, Debug)]
 pub enum EncoderType {
     /// The first k symbols of a systematic Encoder correspond to the first k source symbols
     /// In case there is no loss, no repair needed. After the first k symbols are sent, it continous
@@ -130,7 +131,7 @@ impl Iterator for Encoder {
                     r[j] = self.data[i];
                     j+=1;
                 }
-                if self.cnt >= self.cnt_blocks {
+                if (self.cnt + 2)  > self.cnt_blocks {
                     self.encodertype = EncoderType::Random;
                 }
                 Some(Droplet::new(DropType::Edges(vec![self.cnt]), r))
@@ -141,15 +142,6 @@ impl Iterator for Encoder {
         drop
     }
 }
-
-//impl Iterator for SystematicEncoder {
-//    type Item = Droplet;
-//
-//    fn next(&mut self) -> Option<Droplet> {
-//
-//    }
-//}
-
 
 /// Decoder for the Luby transform
 pub struct Decoder {
@@ -255,6 +247,8 @@ impl Decoder {
                 None => return,
                 Some(drop) => {
                     let edges = drop.borrow().edges_idx.clone();
+                    //TODO: Maybe add shortcut for the first wave of systematic codes, reduce overhead
+
                     for ed in edges { //the list is edited, hence we copy first
                         let block = self.blocks.get_mut(ed).unwrap();
                         if block.is_known {
