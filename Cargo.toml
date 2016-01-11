@@ -1,12 +1,12 @@
 [package]
 name = "fountaincode"
-version = "0.0.6"
+version = "0.0.7"
 authors = ["Christoph Doblander <chris@degree.at>"]
 
 description = "Implementation of the Luby Transform Code in Rust"
 homepage = "https://github.com/chrido/fountain"
 repository = "https://github.com/chrido/fountain.git"
-license = "MIT"
+license = "MIT/Apache-2.0"
 keywords = ["FEC", "ErrorCorrection", "FountainCode"]
 
 [dependencies]
