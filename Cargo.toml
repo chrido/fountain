@@ -1,6 +1,6 @@
 [package]
 name = "fountaincode"
-version = "0.0.7"
+version = "0.0.8"
 authors = ["Christoph Doblander <chris@degree.at>"]
 
 description = "Implementation of the Luby Transform Code in Rust"
@@ -10,4 +10,4 @@ license = "MIT/Apache-2.0"
 keywords = ["FEC", "ErrorCorrection", "FountainCode"]
 
 [dependencies]
-rand = "0.3"
+rand = "0.3.14"
